@@ -1,0 +1,21 @@
+Detailed Analysis of Sexual Abuse Cases in Taiwan
+==================================================
+
+
+Gender_Patterns
+---------------
+Overall_FM_Ratio: 4.296602091681192
+Trend_in_Ratio: -0.11388196383563215
+Most_Vulnerable_Gender: Female
+
+Age_Patterns
+------------
+Most_Vulnerable_Age: 15-Under 18 Years
+Fastest_Growing_Age_Group: Under 12 Years
+Average_Cases_by_Age: {'12-Under 15 Years': 17.02, '15-Under 18 Years': 19.7, 'Under 12 Years': 3.69}
+
+Regional_Patterns
+-----------------
+Highest_Risk_Regions: ['Kaohsiung City', 'New Taipei City', 'Taichung City', 'Taipei City', 'Taoyuan City']
+Highest_Case_Region: New Taipei City
+Regions_Above_Average: ['Changhua County', 'Kaohsiung City', 'New Taipei City', 'Taichung City', 'Tainan City', 'Taipei City', 'Taoyuan City']

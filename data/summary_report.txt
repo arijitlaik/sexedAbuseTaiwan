@@ -1,0 +1,8 @@
+Summary Report on Youth Sexual Abuse Cases
+==================================================
+
+Total Cases: 12446
+Years Covered: 7
+High Risk Regions: ['Changhua County', 'Hsinchu County', 'Kaohsiung City', 'New Taipei City', 'Pingtung County', 'Taichung City', 'Tainan City', 'Taipei City', 'Taoyuan City']
+Age Group Most Affected: 15-Under 18 Years
+Gender Ratio: 2.8580285182889025

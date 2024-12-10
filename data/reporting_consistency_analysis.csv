@@ -1,0 +1,25 @@
+,Count,Count,Count,Count
+,sum,mean,std,cv
+Region,,,,
+Changhua County,863,20.55,18.31,0.89
+Chiayi City,129,3.07,3.25,1.06
+Chiayi County,171,4.07,4.89,1.2
+Hsinchu City,283,6.74,7.92,1.18
+Hsinchu County,377,8.98,8.96,1.0
+Hualien County,287,6.83,7.85,1.15
+Kaohsiung City,1720,40.95,39.25,0.96
+Keelung City,297,7.07,7.07,1.0
+Kinmen County,69,1.64,5.11,3.12
+Lienchiang County,4,0.1,0.48,4.8
+Miaoli County,283,6.74,6.86,1.02
+Nantou County,302,7.19,6.83,0.95
+New Taipei City,2176,51.81,50.25,0.97
+Penghu County,16,0.38,0.7,1.84
+Pingtung County,441,10.5,8.79,0.84
+Taichung City,1246,29.67,30.21,1.02
+Tainan City,786,18.71,21.47,1.15
+Taipei City,959,22.83,24.18,1.06
+Taitung County,193,4.6,4.13,0.9
+Taoyuan City,1296,30.86,28.05,0.91
+Yilan County,226,5.38,5.81,1.08
+Yunlin County,322,7.67,7.87,1.03
