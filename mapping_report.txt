@@ -1,0 +1,71 @@
+Data Mapping Report
+==================================================
+
+Regions in data:
+Changhua County
+Chiayi City
+Chiayi County
+Hsinchu City
+Hsinchu County
+Hualien County
+Kaohsiung City
+Keelung City
+Kinmen County
+Lienchiang County
+Miaoli County
+Nantou County
+New Taipei City
+Penghu County
+Pingtung County
+Taichung City
+Tainan City
+Taipei City
+Taitung County
+Taoyuan City
+Yilan County
+Yunlin County
+
+Regions in shapefile:
+Changhwa
+Chiayi
+Hsinchu
+Hualien
+Ilan
+Kaohsiung
+Kaohsiung City
+Keelung City
+Miaoli
+Nantou
+Penghu
+Pingtung
+Taichung
+Taichung City
+Tainan
+Tainan City
+Taipei
+Taipei City
+Taitung
+Taoyuan
+Yunlin
+
+Mapping dictionary:
+Changhua County -> Changhwa
+Chiayi City -> Chiayi
+Chiayi County -> Chiayi
+Hsinchu City -> Hsinchu
+Hsinchu County -> Hsinchu
+Hualien County -> Hualien
+Kaohsiung City -> Kaohsiung City
+Keelung City -> Keelung City
+Miaoli County -> Miaoli
+Nantou County -> Nantou
+New Taipei City -> Taipei
+Penghu County -> Penghu
+Pingtung County -> Pingtung
+Taichung City -> Taichung City
+Tainan City -> Tainan City
+Taipei City -> Taipei City
+Taitung County -> Taitung
+Taoyuan City -> Taoyuan
+Yilan County -> Ilan
+Yunlin County -> Yunlin
