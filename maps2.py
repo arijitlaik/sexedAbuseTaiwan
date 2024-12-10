@@ -344,56 +344,52 @@ def create_gender_distribution_plot(melted_data):
 
 def create_regional_map(data, taiwan_map, year):
     """
-    Create a focused map of Taiwan with detailed insets for islands and mainland
+    Create a complete map of Taiwan with main island and detailed island insets
     """
-    # Step 1: Data Preparation
-    # Get data for specific year
-    yearly_data = data[data['Year'] == year]
-    regional_totals = yearly_data.groupby('Region')[['Under 12 Years', '12-Under 15 Years', '15-Under 18 Years']].sum().sum(axis=1)
+    try:
+        # Step 1: Data Preparation
+        yearly_data = data[data['Year'] == year]
+        regional_totals = yearly_data.groupby('Region')[['Under 12 Years', '12-Under 15 Years', '15-Under 18 Years']].sum().sum(axis=1)
 
-    # Step 2: Prepare the map
-    # Create a copy of the map and set projection
-    base_map = taiwan_map.copy()
-    base_map = base_map.to_crs(epsg=3824)  # TWD97 / TM2 zone 121
+        # Step 2: Prepare base map
+        base_map = taiwan_map.copy()
+        base_map = base_map.to_crs(epsg=3824)  # TWD97 / TM2 zone 121
 
-    # Step 3: Create name mapping dictionary
-    name_mapping = {
-        # Special municipalities
-        'Taipei City': 'Taipei City',
-        'New Taipei City': 'Taipei',
-        'Taoyuan City': 'Taoyuan',
-        'Taichung City': 'Taichung City',
-        'Tainan City': 'Tainan City',
-        'Kaohsiung City': 'Kaohsiung City',
+        # Step 3: Name mapping dictionary
+        name_mapping = {
+            'Taipei City': 'Taipei City',
+            'New Taipei City': 'Taipei',
+            'Taoyuan City': 'Taoyuan',
+            'Taichung City': 'Taichung City',
+            'Tainan City': 'Tainan City',
+            'Kaohsiung City': 'Kaohsiung City',
+            'Keelung City': 'Keelung City',
+            'Hsinchu City': 'Hsinchu',
+            'Chiayi City': 'Chiayi',
+            'Changhua County': 'Changhwa',
+            'Chiayi County': 'Chiayi',
+            'Hsinchu County': 'Hsinchu',
+            'Hualien County': 'Hualien',
+            'Yilan County': 'Ilan',
+            'Miaoli County': 'Miaoli',
+            'Nantou County': 'Nantou',
+            'Pingtung County': 'Pingtung',
+            'Taitung County': 'Taitung',
+            'Yunlin County': 'Yunlin',
+            'Penghu County': 'Penghu',
+            'Kinmen County': 'Kinmen',
+            'Lienchiang County': 'Lienchiang'
+        }
 
-        # Provincial cities
-        'Keelung City': 'Keelung City',
-        'Hsinchu City': 'Hsinchu',
-        'Chiayi City': 'Chiayi',
+        # Step 4: Map the data
+        mapped_data = {}
+        city_county_combined = {}
 
-        # Counties
-        'Changhua County': 'Changhwa',
-        'Chiayi County': 'Chiayi',
-        'Hsinchu County': 'Hsinchu',
-        'Hualien County': 'Hualien',
-        'Yilan County': 'Ilan',
-        'Miaoli County': 'Miaoli',
-        'Nantou County': 'Nantou',
-        'Pingtung County': 'Pingtung',
-        'Taitung County': 'Taitung',
-        'Yunlin County': 'Yunlin',
-        'Penghu County': 'Penghu'
-    }
-
-    # Step 4: Map the data
-    mapped_data = {}
-    city_county_combined = {}
-
-    for region, total in regional_totals.items():
-        if region in name_mapping:
-            shapefile_name = name_mapping[region]
-            if 'City' in region or 'County' in region:
+        for region, total in regional_totals.items():
+            if region in name_mapping:
+                shapefile_name = name_mapping[region]
                 base_name = shapefile_name.replace(' City', '').replace(' County', '')
+
                 if base_name in ['Hsinchu', 'Chiayi']:
                     if base_name not in city_county_combined:
                         city_county_combined[base_name] = {'City': 0, 'County': 0}
@@ -404,152 +400,156 @@ def create_regional_map(data, taiwan_map, year):
                     mapped_data[base_name] = city_county_combined[base_name]['City'] + city_county_combined[base_name]['County']
                 else:
                     mapped_data[shapefile_name] = total
-            else:
-                mapped_data[shapefile_name] = total
 
-    # Add mapped data to base map
-    base_map['total_count'] = base_map['NAME_2'].map(mapped_data)
+        # Add mapped data to base map
+        base_map['total_count'] = base_map['NAME_2'].map(mapped_data)
 
-    # Step 5: Create the visualization
-    # Set up the figure with GridSpec
-    fig = plt.figure(figsize=(20, 15))
-    gs = fig.add_gridspec(4, 6, height_ratios=[0.5, 3, 3, 0.5])
+        # Step 5: Create figure and axes
+        fig = plt.figure(figsize=(20, 15))
+        gs = plt.GridSpec(3, 3, height_ratios=[1, 1, 0.2])
 
-    # Create axes
-    ax_main = fig.add_subplot(gs[1:3, :4])  # Main map
-    ax_penghu = fig.add_subplot(gs[1, 4:])  # Penghu
-    ax_kinmen = fig.add_subplot(gs[2, 4])   # Kinmen
-    ax_matsu = fig.add_subplot(gs[2, 5])    # Matsu (Lienchiang)
+        # Create axes
+        ax_main = fig.add_subplot(gs[:2, :2])  # Main map (2x2)
+        ax_islands = fig.add_subplot(gs[:2, 2])  # Islands column
+        ax_stats = fig.add_subplot(gs[2, :])    # Stats row
 
-    # Create title and stats axes
-    ax_title = fig.add_subplot(gs[0, :])
-    ax_stats = fig.add_subplot(gs[3, :])
-    ax_title.axis('off')
-    ax_stats.axis('off')
+        # Turn off axes for stats
+        ax_stats.axis('off')
 
-    # Create custom colormap
-    colors = ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#41ab5d', '#238b45', '#006d2c']
-    cmap = LinearSegmentedColormap.from_list("custom", colors)
+        # Step 6: Create custom colormap
+        colors = ['#f7fcf5', '#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#41ab5d', '#238b45', '#006d2c']
+        cmap = LinearSegmentedColormap.from_list("custom", colors)
 
-    # Plot main Taiwan map
-    mainland_mask = ~base_map['NAME_2'].isin(['Penghu'])
-    main_map = base_map[mainland_mask]
+        # Step 7: Plot main Taiwan map
+        main_map = base_map[base_map['NAME_2'].notna()]
 
-    main_map.plot(
-        column='total_count',
-        ax=ax_main,
-        legend=True,
-        legend_kwds={
-            'label': 'Youth Population',
-            'orientation': 'horizontal',
-            'shrink': 0.7,
-            'aspect': 30,
-            'fraction': 0.05,
-            'pad': 0.05,
-            'format': '{x:,.0f}'
-        },
-        cmap=cmap,
-        missing_kwds={'color': '#f5f5f5'},
-        edgecolor='white',
-        linewidth=1.0
-    )
-
-    # Step 6: Add inset maps for islands
-    island_data = {
-        'Penghu County': {
-            'ax': ax_penghu,
-            'title': 'Penghu County',
-            'color': '#74c476'
-        },
-        'Kinmen County': {
-            'ax': ax_kinmen,
-            'title': 'Kinmen County',
-            'color': '#41ab5d'
-        },
-        'Lienchiang County': {
-            'ax': ax_matsu,
-            'title': 'Lienchiang County\n(Matsu)',
-            'color': '#238b45'
-        }
-    }
-
-    # Add island insets
-    for county, info in island_data.items():
-        ax = info['ax']
-        value = regional_totals.get(county, 0)
-
-        # Create box for island data
-        rect = plt.Rectangle(
-            (0, 0), 1, 1,
-            facecolor='white',
-            edgecolor=info['color'],
-            linewidth=2,
-            transform=ax.transAxes
+        main_map.plot(
+            column='total_count',
+            ax=ax_main,
+            legend=True,
+            legend_kwds={
+                'label': 'Youth Population',
+                'orientation': 'horizontal',
+                'shrink': 0.8,
+                'aspect': 25,
+                'fraction': 0.1,
+                'pad': 0.05,
+                'format': '{x:,.0f}'
+            },
+            cmap=cmap,
+            missing_kwds={'color': '#f5f5f5'},
+            edgecolor='white',
+            linewidth=0.8
         )
-        ax.add_patch(rect)
 
-        # Add island information
-        if county in yearly_data['Region'].values:
-            county_data = yearly_data[yearly_data['Region'] == county].iloc[0]
+        # Add annotations to main map
+        for idx, row in main_map.iterrows():
+            if pd.notnull(row['total_count']):
+                point = row.geometry.representative_point()
+                base_name = row['NAME_2'].replace(' City', '').replace(' County', '')
 
-            # Add title
-            ax.text(0.5, 0.9, info['title'],
-                   ha='center', va='center',
-                   fontsize=12, fontweight='bold',
-                   transform=ax.transAxes)
+                if base_name in city_county_combined:
+                    label = (f"{base_name}\nCity: {int(city_county_combined[base_name]['City']):,}\n"
+                            f"County: {int(city_county_combined[base_name]['County']):,}\n"
+                            f"Total: {int(row['total_count']):,}")
+                else:
+                    label = f"{row['NAME_2']}\n{int(row['total_count']):,}"
 
-            # Add total
-            ax.text(0.5, 0.75, f"Total: {int(value):,}",
-                   ha='center', va='center',
-                   fontsize=11, color=info['color'],
-                   fontweight='bold',
-                   transform=ax.transAxes)
+                ax_main.annotate(
+                    text=label,
+                    xy=(point.x, point.y),
+                    ha='center',
+                    va='center',
+                    fontsize=8,
+                    bbox=dict(
+                        facecolor='white',
+                        alpha=0.7,
+                        edgecolor='gray',
+                        boxstyle='round,pad=0.3'
+                    )
+                )
 
-            # Add age breakdown
-            y_pos = 0.6
-            for age_group in ['Under 12 Years', '12-Under 15 Years', '15-Under 18 Years']:
-                ax.text(0.5, y_pos,
-                       f"{age_group}: {int(county_data[age_group]):,}",
-                       ha='center', va='center',
-                       fontsize=9,
-                       transform=ax.transAxes)
-                y_pos -= 0.15
+        # Step 8: Plot island data
+        island_regions = ['Penghu County', 'Kinmen County', 'Lienchiang County']
+        island_data = []
 
-        ax.axis('off')
+        for region in island_regions:
+            if region in regional_totals.index:
+                total = regional_totals[region]
+                age_data = yearly_data[yearly_data['Region'] == region].iloc[0]
 
-    # Step 7: Add annotations and finalize
-    # Add title
-    ax_title.text(0.5, 0.5,
-                 f'Taiwan Youth Population Distribution {year}',
-                 ha='center', va='center',
-                 fontsize=20, fontweight='bold')
+                island_data.append({
+                    'name': region,
+                    'total': total,
+                    'under_12': age_data['Under 12 Years'],
+                    '12_15': age_data['12-Under 15 Years'],
+                    '15_18': age_data['15-Under 18 Years']
+                })
 
-    # Add summary statistics
-    total_youth = int(regional_totals.sum())
-    offshore_youth = sum(regional_totals.get(county, 0) for county in island_data.keys())
-    main_island_youth = total_youth - offshore_youth
+        # Create island information display
+        ax_islands.axis('off')
+        y_pos = 0.95
 
-    stats_text = (
-        f"Total Youth Population: {total_youth:,}   |   "
-        f"Main Island: {main_island_youth:,} ({main_island_youth/total_youth*100:.1f}%)   |   "
-        f"Offshore Islands: {offshore_youth:,} ({offshore_youth/total_youth*100:.1f}%)"
-    )
+        for island in island_data:
+            # Create text for island data
+            island_text = (
+                f"{island['name']}\n"
+                f"Total: {int(island['total']):,}\n"
+                f"Under 12: {int(island['under_12']):,}\n"
+                f"Ages 12-15: {int(island['12_15']):,}\n"
+                f"Ages 15-18: {int(island['15_18']):,}\n"
+            )
 
-    ax_stats.text(0.5, 0.5, stats_text,
-                 ha='center', va='center',
-                 fontsize=12, fontweight='bold',
-                 transform=ax_stats.transAxes)
+            # Add text box for each island
+            ax_islands.text(
+                0.5, y_pos,
+                island_text,
+                ha='center',
+                va='top',
+                fontsize=10,
+                bbox=dict(
+                    facecolor='white',
+                    edgecolor='#238b45',
+                    boxstyle='round,pad=0.5'
+                ),
+                transform=ax_islands.transAxes
+            )
+            y_pos -= 0.33
 
-    # Adjust layout and save
-    plt.tight_layout()
-    plt.savefig(f'plots/taiwan_youth_{year}.png',
-                bbox_inches='tight',
-                dpi=300,
-                pad_inches=0.2,
-                facecolor='white')
-    plt.close()
+        # Step 9: Add title and statistics
+        plt.suptitle(f'Taiwan Youth Population Distribution {year}',
+                    fontsize=20, y=0.95)
 
-    return base_map
+        # Add summary statistics
+        total_youth = int(regional_totals.sum())
+        offshore_youth = sum(regional_totals.get(region, 0) for region in island_regions)
+        main_island_youth = total_youth - offshore_youth
+
+        stats_text = (
+            f"Total Youth Population: {total_youth:,}   |   "
+            f"Main Island: {main_island_youth:,} ({main_island_youth/total_youth*100:.1f}%)   |   "
+            f"Offshore Islands: {offshore_youth:,} ({offshore_youth/total_youth*100:.1f}%)"
+        )
+
+        ax_stats.text(0.5, 0.5, stats_text,
+                     ha='center', va='center',
+                     fontsize=12, fontweight='bold',
+                     transform=ax_stats.transAxes)
+
+        # Adjust layout and save
+        plt.tight_layout()
+        plt.savefig(f'plots/taiwan_youth_{year}.png',
+                    bbox_inches='tight',
+                    dpi=300,
+                    pad_inches=0.2,
+                    facecolor='white')
+        plt.close()
+
+        return base_map
+
+    except Exception as e:
+        print(f"Error generating map for year {year}: {str(e)}")
+        raise
 
 
 def create_regional_trends(melted_data):
