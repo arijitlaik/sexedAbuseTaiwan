@@ -217,7 +217,7 @@ def create_regional_map(melted_data, taiwan_map, year):
     buffer_x = (maxx - minx) * 0.001
     buffer_y = (maxy - miny) * 0.001
     ax.set_xlim(118 - buffer_x, maxx + buffer_x)
-    ax.set_ylim(miny - buffer_y, maxy + buffer_y)
+    ax.set_ylim(miny+1 - buffer_y, maxy + buffer_y)
     # Plot the map with improved aesthetics
     merged.plot(
         column='Count',
@@ -289,6 +289,10 @@ def create_gender_variation_map(melted_data, taiwan_map, year):
     )
     axes[0].set_title('Male Youth Count', fontsize=16)
     axes[0].axis('off')
+    minx, miny, maxx, maxy = taiwan_map.total_bounds
+    print(minx, miny, maxx, maxy)
+    buffer_x = (maxx - minx) * 0.001
+    buffer_y = (maxy - miny) * 0.001
     
     # Plot Female map
     female_data = merged[merged['Gender'] == 'Female']
@@ -303,7 +307,9 @@ def create_gender_variation_map(melted_data, taiwan_map, year):
     )
     axes[1].set_title('Female Youth Count', fontsize=16)
     axes[1].axis('off')
-    
+    for ax in axes:
+        ax.set_xlim(118 - buffer_x, maxx + buffer_x)
+        ax.set_ylim(miny+1 - buffer_y, maxy + buffer_y)
     # Add a unified colorbar below the subplots
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []
