@@ -1,4 +1,3 @@
-
 # Part 1: Imports and Setup
 import pandas as pd
 import numpy as np
@@ -411,7 +410,6 @@ def create_regional_map(data, taiwan_map, year):
         # Create axes
         ax_main = fig.add_subplot(gs[:2, :2])  # Main map (2x2)
         ax_islands = fig.add_subplot(gs[:2, 2])  # Islands column
-        ax_stats = fig.add_subplot(gs[2, :])    # Stats row
 
         # Turn off axes for stats
         ax_stats.axis('off')
