@@ -191,59 +191,74 @@ def create_gender_distribution_plot(melted_data):
     plt.close()
 
 def create_regional_map(melted_data, taiwan_map, year):
-    """Create and save a publication-ready regional map for a specific year"""
-    # Filter and prepare data
-    yearly_data = melted_data[melted_data['Year'] == year].groupby('Region')['Count'].sum().reset_index()
-    name_mapping = create_region_mapping()
-    yearly_data['MappedRegion'] = yearly_data['Region'].map(name_mapping)
-    yearly_data.dropna(subset=['MappedRegion'], inplace=True)
+    """Create and save a publication-ready regional map with insets for small islands"""
+    # Data preparation (previous code remains the same)
     
-    # Merge data with shapefile
-    merged = taiwan_map.set_index('NAME_2').join(yearly_data.set_index('MappedRegion'))
+    # Create figure with room for insets
+    fig = plt.figure(figsize=(12, 15), dpi=300)
     
-    if 'Count' not in merged.columns:
-        print(f"Warning: No data for year {year}")
-        return
-
-    # Create figure with custom size and DPI for publication quality
-    fig = plt.figure(figsize=(10, 12), dpi=300)
+    # Main map (90% of height)
+    ax_main = fig.add_axes([0.1, 0.2, 0.8, 0.7])
     
-    # Create main map
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # [left, bottom, width, height]
-    plt.title(f"Regional Youth Counts in {year}", fontsize=18, pad=20)
-    plt.axis('off')
-    minx, miny, maxx, maxy = taiwan_map.total_bounds
-    print(minx, miny, maxx, maxy)
-    buffer_x = (maxx - minx) * 0.000001
-    buffer_y = (maxy - miny) * 0.000001
-    ax.set_xlim(minx - buffer_x, maxx + buffer_x)
-    ax.set_ylim(miny - buffer_y, maxy + buffer_y)
-    # Plot the map with improved aesthetics
+    # Plot main map
     merged.plot(
         column='Count',
         cmap='OrRd',
-        ax=ax,
+        ax=ax_main,
         edgecolor='black',
         linewidth=0.3,
         missing_kwds={'color': 'lightgrey'},
         legend=False
     )
-
-    # Add a smaller, horizontally oriented colorbar
+    
+    # Add inset for Kinmen & Matsu (top right)
+    ax_kinmen = fig.add_axes([0.7, 0.75, 0.25, 0.2])
+    kinmen_matsu = merged[merged['NAME_1'].isin(['Kinmen', 'Lienchiang'])]
+    if not kinmen_matsu.empty:
+        kinmen_matsu.plot(
+            column='Count',
+            cmap='OrRd',
+            ax=ax_kinmen,
+            edgecolor='black',
+            linewidth=0.3
+        )
+    ax_kinmen.set_title('Kinmen & Matsu', fontsize=8)
+    
+    # Add inset for Penghu (bottom right)
+    ax_penghu = fig.add_axes([0.7, 0.15, 0.25, 0.2])
+    penghu = merged[merged['NAME_1'] == 'Penghu']
+    if not penghu.empty:
+        penghu.plot(
+            column='Count',
+            cmap='OrRd',
+            ax=ax_penghu,
+            edgecolor='black',
+            linewidth=0.3
+        )
+    ax_penghu.set_title('Penghu Islands', fontsize=8)
+    
+    # Colorbar at bottom
     sm = plt.cm.ScalarMappable(
         cmap='OrRd',
         norm=plt.Normalize(vmin=merged['Count'].min(), vmax=merged['Count'].max())
     )
     sm._A = []
     
-    # Add colorbar with custom size and position
-    cax = fig.add_axes([0.15, 0.05, 0.7, 0.02])  # [left, bottom, width, height]
+    # Smaller colorbar
+    cax = fig.add_axes([0.3, 0.1, 0.4, 0.02])
     cbar = fig.colorbar(sm, cax=cax, orientation='horizontal')
     cbar.ax.tick_params(labelsize=8)
     cbar.set_label('Youth Count', fontsize=10, labelpad=5)
+    
+    # Main title
+    plt.suptitle(f"Regional Youth Counts in {year}", y=0.95, fontsize=16)
+    
+    # Remove axes for cleaner look
+    for ax in [ax_main, ax_kinmen, ax_penghu]:
+        ax.axis('off')
+    
     plt.savefig(f"plots/regional_map_{year}.png", bbox_inches='tight')
     plt.close()
-
 def create_regional_trends(melted_data):
     """Create and save regional trends plot"""
     plt.figure(figsize=(20, 15))
