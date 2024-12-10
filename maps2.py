@@ -23,7 +23,7 @@ plt.rcParams.update({
     'axes.labelsize': 14,
     'axes.titlesize': 16,
     'figure.titlesize': 16,
-    'figure.dpi': 300
+    'figure.dpi': 150
 })
 
 def get_taiwan_shapefile():
