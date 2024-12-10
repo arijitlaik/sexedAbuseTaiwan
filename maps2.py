@@ -239,7 +239,7 @@ def create_regional_map(melted_data, taiwan_map, year):
             cmap='OrRd',
             ax=ax,
             edgecolor='black',
-            linewidth=0.5,
+            linewidth=15,
             norm=norm,
             markersize=50,  # Adjust marker size as needed
             label='Smaller Islands'
