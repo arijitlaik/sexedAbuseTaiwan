@@ -194,8 +194,8 @@ def create_regional_map(data, taiwan_map, year):
 
         # Other Cities
         'Keelung City': 'Keelung City',
-        'Hsinchu City': 'Hsinchu',
-        'Chiayi City': 'Chiayi',
+        # 'Hsinchu City': 'Hsinchu',
+        # 'Chiayi City': 'Chiayi',
         'Taoyuan City': 'Taoyuan',
 
         # Counties
@@ -217,10 +217,10 @@ def create_regional_map(data, taiwan_map, year):
     }
 
     # 4. Handle special cases (cities and counties with same name)
-    combined_regions = {
-        'Hsinchu': ['Hsinchu City', 'Hsinchu County'],
-        'Chiayi': ['Chiayi City', 'Chiayi County']
-    }
+    # combined_regions = {
+    #     'Hsinchu': ['Hsinchu City', 'Hsinchu County'],
+    #     'Chiayi': ['Chiayi City', 'Chiayi County']
+    # }
 
     # 5. Map the data with combined regions
     mapped_values = {}
@@ -286,7 +286,7 @@ def create_regional_map(data, taiwan_map, year):
     ax.axis('off')
 
     # Save map
-    plt.savefig(f'taiwan_youth_{year}.png',
+    plt.savefig(f'taiwan_Byouth_{year}.png',
                 dpi=300,
                 bbox_inches='tight',
                 facecolor='white')
