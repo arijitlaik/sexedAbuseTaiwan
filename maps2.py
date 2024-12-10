@@ -191,91 +191,59 @@ def create_gender_distribution_plot(melted_data):
     plt.close()
 
 def create_regional_map(melted_data, taiwan_map, year):
-    """Create and save a regional map for a specific year with enhanced layout"""
-    # Filter data for the specified year and aggregate Count per Region
-    yearly_data = melted_data[melted_data['Year'] == year].copy()
-    aggregated_data = yearly_data.groupby('Region')['Count'].sum().reset_index()
-
-    # Create the region mapping
+    """Create and save a publication-ready regional map for a specific year"""
+    # Filter and prepare data
+    yearly_data = melted_data[melted_data['Year'] == year].groupby('Region')['Count'].sum().reset_index()
     name_mapping = create_region_mapping()
-
-    # Map the region names in the data to the shapefile region names
-    aggregated_data['MappedRegion'] = aggregated_data['Region'].map(name_mapping)
-
-    # Drop any regions that could not be mapped
-    aggregated_data.dropna(subset=['MappedRegion'], inplace=True)
-
-    # Merge the data with the shapefile
-    merged = taiwan_map.set_index('NAME_2').join(aggregated_data.set_index('MappedRegion'))
-
-    # Check if the 'Count' column exists in the merged DataFrame
+    yearly_data['MappedRegion'] = yearly_data['Region'].map(name_mapping)
+    yearly_data.dropna(subset=['MappedRegion'], inplace=True)
+    
+    # Merge data with shapefile
+    merged = taiwan_map.set_index('NAME_2').join(yearly_data.set_index('MappedRegion'))
+    
     if 'Count' not in merged.columns:
-        print(f"Warning: 'Count' column not found for year {year}. Skipping map creation.")
+        print(f"Warning: No data for year {year}")
         return
 
-    # Initialize the figure and axes with a larger size for better visibility
-    fig, ax = plt.subplots(figsize=(20, 12))
-
-    # Define color map normalization based on data range
-    norm = plt.Normalize(vmin=merged['Count'].min(), vmax=merged['Count'].max())
-
-    # Plot the main island
-    main_island = merged[merged['NAME_1'] == 'Taiwan']  # Adjust 'NAME_1' if necessary
-    main_island.plot(
+    # Create figure with custom size and DPI for publication quality
+    fig = plt.figure(figsize=(10, 12), dpi=300)
+    
+    # Create main map
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])  # [left, bottom, width, height]
+    plt.title(f"Regional Youth Counts in {year}", fontsize=18, pad=20)
+    plt.axis('off')
+    minx, miny, maxx, maxy = taiwan_map.total_bounds
+    print(minx, miny, maxx, maxy)
+    buffer_x = (maxx - minx) * 0.000001
+    buffer_y = (maxy - miny) * 0.000001
+    ax.set_xlim(minx - buffer_x, maxx + buffer_x)
+    ax.set_ylim(miny - buffer_y, maxy + buffer_y)
+    # Plot the map with improved aesthetics
+    merged.plot(
         column='Count',
         cmap='OrRd',
         ax=ax,
         edgecolor='black',
-        linewidth=0.5,
-        norm=norm,
-        label='Main Island'
+        linewidth=0.3,
+        missing_kwds={'color': 'lightgrey'},
+        legend=False
     )
 
-    # Plot the smaller islands
-    smaller_islands = merged[merged['NAME_1'] != 'Taiwan']
-    if not smaller_islands.empty:
-        smaller_islands.plot(
-            column='Count',
-            cmap='OrRd',
-            ax=ax,
-            edgecolor='black',
-            linewidth=15,
-            norm=norm,
-            markersize=50,  # Adjust marker size as needed
-            label='Smaller Islands'
-        )
-
-    # Create a ScalarMappable for the colorbar
-    sm = plt.cm.ScalarMappable(cmap='OrRd', norm=norm)
-    sm._A = []  # Dummy array for the ScalarMappable
-
-    # Add the colorbar to the figure
-    cbar = fig.colorbar(sm, ax=ax, orientation='horizontal', fraction=0.05, pad=0.05)
-    cbar.set_label('Youth Count by Region')
-
-    # Set the title and remove axis for a cleaner look
-    plt.title(f"Regional Youth Counts in {year}", fontsize=20, pad=20)
-    plt.axis('off')
-
-    # Ensure the aspect ratio is equal to maintain map proportions
-    ax.set_aspect('equal')
-
-    # Calculate bounds and set limits with buffer to focus on Taiwan
-    minx, miny, maxx, maxy = taiwan_map.total_bounds
-    buffer_x = (maxx - minx) * 0.05
-    buffer_y = (maxy - miny) * 0.05
-    ax.set_xlim(minx - buffer_x, maxx + buffer_x)
-    ax.set_ylim(miny - buffer_y, maxy + buffer_y)
-
-    # Add legends for main island and smaller islands
-    handles, labels = ax.get_legend_handles_labels()
-    if handles:
-        ax.legend(handles, labels, loc='upper left')
-
-    # Adjust layout and save the figure
-    plt.tight_layout()
+    # Add a smaller, horizontally oriented colorbar
+    sm = plt.cm.ScalarMappable(
+        cmap='OrRd',
+        norm=plt.Normalize(vmin=merged['Count'].min(), vmax=merged['Count'].max())
+    )
+    sm._A = []
+    
+    # Add colorbar with custom size and position
+    cax = fig.add_axes([0.15, 0.05, 0.7, 0.02])  # [left, bottom, width, height]
+    cbar = fig.colorbar(sm, cax=cax, orientation='horizontal')
+    cbar.ax.tick_params(labelsize=8)
+    cbar.set_label('Youth Count', fontsize=10, labelpad=5)
     plt.savefig(f"plots/regional_map_{year}.png", bbox_inches='tight')
     plt.close()
+
 def create_regional_trends(melted_data):
     """Create and save regional trends plot"""
     plt.figure(figsize=(20, 15))
